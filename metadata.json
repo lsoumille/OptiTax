@@ -1,0 +1,7 @@
+{
+  "name": "OptiTax CGP - Expert Patrimoine",
+  "description": "Une application d'optimisation fiscale avancée pour les conseillers en gestion de patrimoine. Analysez les avis d'imposition et déclarations pour proposer des stratégies sur mesure (PER, PFU, Immobilier, Défiscalisation).",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
