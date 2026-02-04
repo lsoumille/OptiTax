@@ -40,14 +40,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const startTime = Date.now();
-    
+
     // Validate API key is configured
     if (!context.env.GEMINI_API_KEY) {
       console.error('[API] GEMINI_API_KEY not configured');
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "GEMINI_API_KEY not configured" 
+        JSON.stringify({
+          success: false,
+          error: "GEMINI_API_KEY not configured"
         }),
         { status: 500, headers: corsHeaders }
       );
@@ -60,9 +60,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     } catch (e) {
       console.error('[API] Invalid request body', e);
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "Invalid request format" 
+        JSON.stringify({
+          success: false,
+          error: "Invalid request format"
         }),
         { status: 400, headers: corsHeaders }
       );
@@ -79,9 +79,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     // Validate request body
     if (!body.files || !Array.isArray(body.files) || body.files.length === 0) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "Invalid request format: files array required" 
+        JSON.stringify({
+          success: false,
+          error: "Invalid request format: files array required"
         }),
         { status: 400, headers: corsHeaders }
       );
@@ -92,9 +92,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     for (const file of body.files) {
       if (!file.data || file.data.length > MAX_FILE_SIZE) {
         return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Fichier trop volumineux (limite: 10MB par fichier)" 
+          JSON.stringify({
+            success: false,
+            error: "Fichier trop volumineux (limite: 10MB par fichier)"
           }),
           { status: 400, headers: corsHeaders }
         );
@@ -116,6 +116,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     1. Extrais les données clés (TMI, Revenus, Charges, Crédits).
     2. Calcule la TMI précise.
     3. Effectue un audit exhaustif des opportunités d'optimisation.
+
+    EXIGENCE DE QUALITÉ ET DE DÉTAILS (CRITIQUE) :
+    Les stratégies proposées ne doivent pas être des généralités. Elles doivent être EXPERTES, CHIFFRÉES et ACTIONNABLES.
+    Pour chaque optimisation :
+    - Explique LE MÉCANISME : Comment ça marche techniquement (articles CGI si pertinent).
+    - JUSTIFIE LA PERTINENCE : Pourquoi pour ce dossier précis c'est une bonne idée.
+    - DÉTAILLE L'AMOUNT : Estime le gain fiscal avec précision.
+    - DÉTAILLE L'ACTION : Liste les étapes concrètes (ex: quel formulaire remplir, quelle case cocher, quel délai respecter).
 
     RÈGLE DE PRIORITÉ SUR LES RÉGIMES :
     Même si le client a "déjà implémenté" une stratégie de déclaration (ex: il a déclaré en Micro-Foncier), si cette stratégie repose sur un ABATTEMENT FORFAITAIRE, tu DOIS analyser si le passage au RÉEL (ou amortissement) serait plus bénéfique.
@@ -212,13 +220,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // Parse and return result
     const analysisResult = JSON.parse(response.text || "{}");
-    
+
     // Validate response structure
     if (!analysisResult.extractedData || !analysisResult.optimizations || !analysisResult.summary) {
       console.error('[API] Invalid analysis result structure', analysisResult);
       throw new Error('Le résultat de l\'analyse est incomplet');
     }
-    
+
     const duration = Date.now() - startTime;
     console.log('[API] Request successful', {
       duration: `${duration}ms`,
@@ -226,9 +234,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     });
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        content: analysisResult 
+      JSON.stringify({
+        success: true,
+        content: analysisResult
       }),
       { status: 200, headers: corsHeaders }
     );
@@ -236,16 +244,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   } catch (error) {
     // Error handling with user-friendly message
     const errorMessage = error instanceof Error ? error.message : "Une erreur est survenue lors de l'analyse";
-    
+
     console.error('[API] Request failed', {
       error: errorMessage,
       timestamp: new Date().toISOString()
     });
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: errorMessage 
+      JSON.stringify({
+        success: false,
+        error: errorMessage
       }),
       { status: 500, headers: corsHeaders }
     );

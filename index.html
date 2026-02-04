@@ -1,18 +1,86 @@
-
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiTax by l'Ingé Patrimoine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script type="importmap">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <!-- SEO Meta Tags -->
+  <title>OptiTax - Analyse Fiscale Patrimoniale | L'Ingé Patrimoine</title>
+  <meta name="description"
+    content="Outil d'analyse fiscale pour conseillers en gestion de patrimoine. Optimisez les impôts de vos clients et maximisez leur patrimoine avec OptiTax.">
+  <meta name="keywords"
+    content="optimisation fiscale, analyse impôts, CGP, conseiller patrimoine, avis imposition, niches fiscales, PER, défiscalisation">
+  <meta name="author" content="L'Ingé Patrimoine">
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow">
+  <link rel="canonical" href="https://optitax.lingepatrimoine.fr/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://optitax.lingepatrimoine.fr/">
+  <meta property="og:title" content="OptiTax - Analyse Fiscale Patrimoniale">
+  <meta property="og:description"
+    content="Outil d'analyse fiscale pour conseillers en gestion de patrimoine. Expertise digitale signée L'Ingé Patrimoine.">
+  <meta property="og:image" content="https://lingepatrimoine.fr/logo/logo_inge_patrimoine-removebg-preview.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="OptiTax">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://optitax.lingepatrimoine.fr/">
+  <meta property="twitter:title" content="OptiTax - Analyse Fiscale Patrimoniale">
+  <meta property="twitter:description"
+    content="Optimisez les impôts et maximisez le patrimoine de vos clients avec notre outil d'analyse fiscale.">
+  <meta property="twitter:image" content="https://lingepatrimoine.fr/logo/logo_inge_patrimoine-removebg-preview.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://lingepatrimoine.fr/logo/logo_inge_patrimoine-removebg-preview.png">
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#0A2540">
+  <meta name="msapplication-TileColor" content="#0A2540">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0A2540',
+              accent: '#00D9FF',
+              accentLight: 'rgba(0, 217, 255, 0.08)',
+              light: '#F8F9FA',
+            }
+          },
+          fontFamily: {
+            heading: ['Outfit', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Import Maps -->
+  <script type="importmap">
     {
       "imports": {
+        "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
         "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
         "react/": "https://esm.sh/react@^19.2.3/",
         "react": "https://esm.sh/react@^19.2.3",
@@ -21,9 +89,56 @@
       }
     }
     </script>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://lingepatrimoine.fr/#organization",
+          "name": "L'Ingé Patrimoine",
+          "url": "https://lingepatrimoine.fr",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://lingepatrimoine.fr/logo/logo_inge_patrimoine-removebg-preview.png"
+          },
+          "description": "Expert en conseil patrimonial et optimisation fiscale",
+          "sameAs": [
+            "https://lingepatrimoine.fr"
+          ]
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://optitax.lingepatrimoine.fr/#webapp",
+          "name": "OptiTax",
+          "url": "https://optitax.lingepatrimoine.fr",
+          "description": "Outil d'analyse fiscale pour conseillers en gestion de patrimoine. Analysez les avis d'imposition et identifiez les leviers d'optimisation.",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "Any",
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Analyse Fiscale Patrimoniale",
+              "description": "Analyse personnalisée des documents fiscaux avec identification des opportunités d'optimisation"
+            }
+          ],
+          "creator": {
+            "@id": "https://lingepatrimoine.fr/#organization"
+          },
+          "inLanguage": "fr-FR",
+          "datePublished": "2025-01-01",
+          "dateModified": "2026-02-04"
+        }
+      ]
+    }
+    </script>
 </head>
+
 <body>
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

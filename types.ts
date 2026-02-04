@@ -23,6 +23,7 @@ export interface OptimizationSuggestion {
   category: 'Retirement' | 'Investment' | 'RealEstate' | 'TaxRegime' | 'Family';
   title: string;
   description: string;
+  reasoning?: string;
   estimatedGain: string;
   complexity: 'Low' | 'Medium' | 'High';
   actionable: string;
