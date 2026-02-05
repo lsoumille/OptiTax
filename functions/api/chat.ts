@@ -144,6 +144,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     - Retraite : PER (vérifier reliquat plafonds 6PS/6PT/6PU).
     - Arbitrage financier : PFU vs Barème (case 2OP).
 
+    IMPORTANT : Pour le champ 'fullName' dans extractedData, ne mets JAMAIS le vrai nom du client. Utilise systématiquement 'Monsieur', 'Madame' ou 'Contribuable' en fonction du contexte détecté. C'est impératif pour la confidentialité.
+
     Retourne les données UNIQUEMENT au format JSON.
   `;
 

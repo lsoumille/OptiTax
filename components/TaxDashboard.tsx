@@ -28,7 +28,7 @@ export const TaxDashboard: React.FC<Props> = ({ data }) => {
         {/* Left Col: Overview */}
         <div className="glass-card rounded-3xl overflow-hidden flex flex-col h-full">
           <div className="bg-brand-navy px-6 py-5">
-            <h2 className="text-2xl font-heading font-bold text-white">{extractedData.fullName}</h2>
+            <h2 className="text-2xl font-heading font-bold text-white">Dossier : {extractedData.fullName}</h2>
             <p className="text-white/60">Situation Fiscale {extractedData.year}</p>
           </div>
           <div className="p-6 flex-1 flex flex-col justify-center">
@@ -159,8 +159,8 @@ export const TaxDashboard: React.FC<Props> = ({ data }) => {
 
                     {/* Complexity Badge */}
                     <div className={`px-4 py-2 rounded-xl border w-full flex items-center justify-between ${opt.complexity === 'Low' ? 'bg-emerald-50/50 border-emerald-100 text-emerald-700' :
-                        opt.complexity === 'Medium' ? 'bg-amber-50/50 border-amber-100 text-amber-700' :
-                          'bg-rose-50/50 border-rose-100 text-rose-700'
+                      opt.complexity === 'Medium' ? 'bg-amber-50/50 border-amber-100 text-amber-700' :
+                        'bg-rose-50/50 border-rose-100 text-rose-700'
                       }`}>
                       <span className="text-[10px] uppercase tracking-widest font-bold opacity-70">Complexité</span>
                       <span className="text-xs font-bold">
