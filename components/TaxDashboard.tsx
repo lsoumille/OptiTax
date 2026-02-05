@@ -28,8 +28,8 @@ export const TaxDashboard: React.FC<Props> = ({ data }) => {
         {/* Left Col: Overview */}
         <div className="glass-card rounded-3xl overflow-hidden flex flex-col h-full">
           <div className="bg-brand-navy px-6 py-5">
-            <h2 className="text-2xl font-heading font-bold text-white">Dossier : {extractedData.fullName}</h2>
-            <p className="text-white/60">Situation Fiscale {extractedData.year}</p>
+            <h2 className="text-2xl font-heading font-bold text-white">Situation Fiscale</h2>
+            <p className="text-white/60">Année {extractedData.year}</p>
           </div>
           <div className="p-6 flex-1 flex flex-col justify-center">
             <div className="space-y-4">
