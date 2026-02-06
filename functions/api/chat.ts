@@ -24,6 +24,110 @@ interface RequestBody {
   userContext?: string;
 }
 
+// --- Schema and Prompt Configuration ---
+
+const RESPONSE_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    extractedData: {
+      type: Type.OBJECT,
+      properties: {
+        fullName: { type: Type.STRING },
+        year: { type: Type.NUMBER },
+        householdParts: { type: Type.NUMBER },
+        taxableIncome: { type: Type.NUMBER },
+        tmi: { type: Type.NUMBER },
+        totalTaxPaid: { type: Type.NUMBER },
+        perCeilingAvailable: { type: Type.NUMBER },
+        realEstateIncome: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              amount: { type: Type.NUMBER },
+              regime: { type: Type.STRING },
+              type: { type: Type.STRING }
+            }
+          }
+        },
+        financialIncome: {
+          type: Type.OBJECT,
+          properties: {
+            dividends: { type: Type.NUMBER },
+            capitalGains: { type: Type.NUMBER },
+            regime: { type: Type.STRING }
+          }
+        }
+      },
+      required: ["fullName", "taxableIncome", "tmi"]
+    },
+    optimizations: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          category: { type: Type.STRING },
+          title: { type: Type.STRING },
+          description: { type: Type.STRING },
+          estimatedGain: { type: Type.STRING },
+          complexity: { type: Type.STRING },
+          actionable: { type: Type.STRING }
+        }
+      }
+    },
+    summary: { type: Type.STRING }
+  },
+  required: ["extractedData", "optimizations", "summary"]
+};
+
+/**
+ * Builds the prompt for the Gemini API
+ */
+function buildPrompt(userContext?: string): string {
+  return `
+    Agis en tant qu'expert en fiscalité française et Conseiller en Gestion de Patrimoine (CGP) senior.
+    Analyse les documents d'imposition fournis (avis d'imposition, déclaration de revenus).
+    
+    ${userContext ? `CONTEXTE CLIENT SPÉCIFIQUE (À PRENDRE EN COMPTE PRIORITAIREMENT) : "${userContext}"` : ""}
+
+    1. Extrais les données clés (TMI, Revenus, Charges, Crédits).
+    2. Calcule la TMI précise.
+    3. Effectue un audit exhaustif des opportunités d'optimisation.
+
+    EXIGENCE DE QUALITÉ ET DE DÉTAILS (CRITIQUE) :
+    Les stratégies proposées ne doivent pas être des généralités. Elles doivent être EXPERTES, CHIFFRÉES et ACTIONNABLES.
+    Pour chaque optimisation :
+    - Explique LE MÉCANISME : Comment ça marche techniquement (articles CGI si pertinent).
+    - JUSTIFIE LA PERTINENCE : Pourquoi pour ce dossier précis c'est une bonne idée.
+    - DÉTAILLE L'AMOUNT : Estime le gain fiscal avec précision.
+    - DÉTAILLE L'ACTION : Liste les étapes concrètes (ex: quel formulaire remplir, quelle case cocher, quel délai respecter).
+
+    RÈGLE DE PRIORITÉ SUR LES RÉGIMES :
+    Même si le client a "déjà implémenté" une stratégie de déclaration (ex: il a déclaré en Micro-Foncier), si cette stratégie repose sur un ABATTEMENT FORFAITAIRE, tu DOIS analyser si le passage au RÉEL (ou amortissement) serait plus bénéfique.
+    
+    Analyses spécifiques d'arbitrage (Abattement vs Réel) :
+    - IMMOBILIER FONCIER : Si déclaré en Micro-Foncier (case 4BE - 30% abattement), compare avec le Réel (déduction intérêts, travaux, charges). Si le gain est probable, suggère le passage au Réel.
+    - MEUBLÉ (LMNP) : Si déclaré en Micro-BIC (case 5ND/5OD - 50% abattement), calcule l'intérêt du passage au LMNP au RÉEL pour pratiquer l'amortissement comptable (souvent bien supérieur à 50% de charges).
+    - SALAIRES : Si abattement de 10% appliqué par défaut, vérifie si le profil (gros revenus, éloignement géographique probable) justifierait les Frais Réels (kilomètres, repas).
+    
+    RÈGLE CRITIQUE DE NON-REDUNDANCE :
+    Ne propose pas de "Verser sur un PER" si le plafond est déjà atteint. 
+    Ne propose pas de "Faire des dons" si le client en fait déjà massivement par rapport à son impôt.
+    Bref, ne propose pas ce qui est déjà optimisé au maximum.
+
+    Niches fiscales et leviers à scanner :
+    - Famille : Frais de garde (7GA), Scolarité (7EA), Emploi domicile (7DB).
+    - Investissement : Girardin (G3), IR-PME/FIP/FCPI, SOFICA.
+    - Retraite : PER (vérifier reliquat plafonds 6PS/6PT/6PU).
+    - Arbitrage financier : PFU vs Barème (case 2OP).
+
+    IMPORTANT : Pour le champ 'fullName' dans extractedData, ne mets JAMAIS le vrai nom du client. Utilise systématiquement 'Monsieur', 'Madame' ou 'Contribuable' en fonction du contexte détecté. C'est impératif pour la confidentialité.
+
+    Retourne les données UNIQUEMENT au format JSON.
+  `;
+}
+
+// Handler function
 export const onRequest: PagesFunction<Env> = async (context) => {
   // CORS headers
   const corsHeaders = {
@@ -70,9 +174,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     // Log request info
     console.log('[API] Request received', {
-      fileCount: body.files.length,
+      fileCount: body.files?.length || 0,
       hasContext: !!body.userContext,
-      totalSize: body.files.reduce((sum, f) => sum + (f.data?.length || 0), 0),
       timestamp: new Date().toISOString()
     });
 
@@ -105,106 +208,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const ai = new GoogleGenAI({ apiKey: context.env.GEMINI_API_KEY });
     const modelName = context.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 
-    // Build prompt (identical to original geminiService.ts)
-    const userContext = body.userContext || "";
-    const prompt = `
-    Agis en tant qu'expert en fiscalité française et Conseiller en Gestion de Patrimoine (CGP) senior.
-    Analyse les documents d'imposition fournis (avis d'imposition, déclaration de revenus).
-    
-    ${userContext ? `CONTEXTE CLIENT SPÉCIFIQUE (À PRENDRE EN COMPTE PRIORITAIREMENT) : "${userContext}"` : ""}
-
-    1. Extrais les données clés (TMI, Revenus, Charges, Crédits).
-    2. Calcule la TMI précise.
-    3. Effectue un audit exhaustif des opportunités d'optimisation.
-
-    EXIGENCE DE QUALITÉ ET DE DÉTAILS (CRITIQUE) :
-    Les stratégies proposées ne doivent pas être des généralités. Elles doivent être EXPERTES, CHIFFRÉES et ACTIONNABLES.
-    Pour chaque optimisation :
-    - Explique LE MÉCANISME : Comment ça marche techniquement (articles CGI si pertinent).
-    - JUSTIFIE LA PERTINENCE : Pourquoi pour ce dossier précis c'est une bonne idée.
-    - DÉTAILLE L'AMOUNT : Estime le gain fiscal avec précision.
-    - DÉTAILLE L'ACTION : Liste les étapes concrètes (ex: quel formulaire remplir, quelle case cocher, quel délai respecter).
-
-    RÈGLE DE PRIORITÉ SUR LES RÉGIMES :
-    Même si le client a "déjà implémenté" une stratégie de déclaration (ex: il a déclaré en Micro-Foncier), si cette stratégie repose sur un ABATTEMENT FORFAITAIRE, tu DOIS analyser si le passage au RÉEL (ou amortissement) serait plus bénéfique.
-    
-    Analyses spécifiques d'arbitrage (Abattement vs Réel) :
-    - IMMOBILIER FONCIER : Si déclaré en Micro-Foncier (case 4BE - 30% abattement), compare avec le Réel (déduction intérêts, travaux, charges). Si le gain est probable, suggère le passage au Réel.
-    - MEUBLÉ (LMNP) : Si déclaré en Micro-BIC (case 5ND/5OD - 50% abattement), calcule l'intérêt du passage au LMNP au RÉEL pour pratiquer l'amortissement comptable (souvent bien supérieur à 50% de charges).
-    - SALAIRES : Si abattement de 10% appliqué par défaut, vérifie si le profil (gros revenus, éloignement géographique probable) justifierait les Frais Réels (kilomètres, repas).
-    
-    RÈGLE CRITIQUE DE NON-REDUNDANCE :
-    Ne propose pas de "Verser sur un PER" si le plafond est déjà atteint. 
-    Ne propose pas de "Faire des dons" si le client en fait déjà massivement par rapport à son impôt.
-    Bref, ne propose pas ce qui est déjà optimisé au maximum.
-
-    Niches fiscales et leviers à scanner :
-    - Famille : Frais de garde (7GA), Scolarité (7EA), Emploi domicile (7DB).
-    - Investissement : Girardin (G3), IR-PME/FIP/FCPI, SOFICA.
-    - Retraite : PER (vérifier reliquat plafonds 6PS/6PT/6PU).
-    - Arbitrage financier : PFU vs Barème (case 2OP).
-
-    IMPORTANT : Pour le champ 'fullName' dans extractedData, ne mets JAMAIS le vrai nom du client. Utilise systématiquement 'Monsieur', 'Madame' ou 'Contribuable' en fonction du contexte détecté. C'est impératif pour la confidentialité.
-
-    Retourne les données UNIQUEMENT au format JSON.
-  `;
-
-    // Define response schema (identical to original)
-    const responseSchema = {
-      type: Type.OBJECT,
-      properties: {
-        extractedData: {
-          type: Type.OBJECT,
-          properties: {
-            fullName: { type: Type.STRING },
-            year: { type: Type.NUMBER },
-            householdParts: { type: Type.NUMBER },
-            taxableIncome: { type: Type.NUMBER },
-            tmi: { type: Type.NUMBER },
-            totalTaxPaid: { type: Type.NUMBER },
-            perCeilingAvailable: { type: Type.NUMBER },
-            realEstateIncome: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  amount: { type: Type.NUMBER },
-                  regime: { type: Type.STRING },
-                  type: { type: Type.STRING }
-                }
-              }
-            },
-            financialIncome: {
-              type: Type.OBJECT,
-              properties: {
-                dividends: { type: Type.NUMBER },
-                capitalGains: { type: Type.NUMBER },
-                regime: { type: Type.STRING }
-              }
-            }
-          },
-          required: ["fullName", "taxableIncome", "tmi"]
-        },
-        optimizations: {
-          type: Type.ARRAY,
-          items: {
-            type: Type.OBJECT,
-            properties: {
-              category: { type: Type.STRING },
-              title: { type: Type.STRING },
-              description: { type: Type.STRING },
-              estimatedGain: { type: Type.STRING },
-              complexity: { type: Type.STRING },
-              actionable: { type: Type.STRING }
-            }
-          }
-        },
-        summary: { type: Type.STRING }
-      },
-      required: ["extractedData", "optimizations", "summary"]
-    };
-
-    // Build parts array from files
+    // Build prompt and parts
+    const prompt = buildPrompt(body.userContext);
     const parts = body.files.map(f => ({
       inlineData: { data: f.data, mimeType: f.mimeType }
     }));
@@ -215,7 +220,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       contents: { parts: [...parts, { text: prompt }] },
       config: {
         responseMimeType: "application/json",
-        responseSchema: responseSchema,
+        responseSchema: RESPONSE_SCHEMA,
         temperature: 0.1,
       }
     });
@@ -244,9 +249,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     );
 
   } catch (error) {
-    // Error handling with user-friendly message
     const errorMessage = error instanceof Error ? error.message : "Une erreur est survenue lors de l'analyse";
-
     console.error('[API] Request failed', {
       error: errorMessage,
       timestamp: new Date().toISOString()
