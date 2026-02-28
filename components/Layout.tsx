@@ -41,7 +41,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <AlertCircle className="w-5 h-5 text-brand-accent shrink-0 mt-0.5" />
               <div className="text-white/80 text-xs leading-relaxed">
                 <p className="font-bold text-white mb-1">Information importante</p>
-                <p>Cet outil est purement informatif et ne constitue pas un conseil fiscal personnalisé. Les analyses et suggestions proposées sont indicatives. Consultez toujours votre conseiller en gestion de patrimoine (CGP) ou expert-comptable pour toute décision fiscale.</p>
+                <p>Cet outil est purement informatif et ne constitue pas un conseil. Les analyses et suggestions proposées sont indicatives. Consultez toujours votre conseiller en gestion de patrimoine pour toute décision.</p>
               </div>
             </div>
           </div>
